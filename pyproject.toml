@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "delivery-triage-llm-ptbr"
+version = "0.1.0"
+description = "QLoRA fine-tuning of Qwen2.5-3B-Instruct for strict JSON delivery incident triage in PT-BR"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.7.0",
+    "scikit-learn>=1.5.0",
+    "numpy>=1.26.0",
+    "matplotlib>=3.9.0",
+    "pyyaml>=6.0.1",
+    "datasets>=2.20.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "ruff>=0.5.0",
+]
+train = [
+    "torch>=2.3.0",
+    "transformers>=4.44.0",
+    "trl>=0.9.6",
+    "peft>=0.12.0",
+    "accelerate>=0.33.0",
+    "bitsandbytes>=0.43.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/prompts.py" = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
