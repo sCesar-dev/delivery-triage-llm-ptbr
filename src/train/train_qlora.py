@@ -8,7 +8,13 @@ Usage (on Google Colab T4 / Kaggle T4):
 
 from __future__ import annotations
 
+try:  # Unsloth must be imported before trl/transformers/peft for full optimizations
+    import unsloth  # noqa: F401  # isort: skip
+except ImportError:
+    pass
+
 import argparse
+import inspect
 import json
 from pathlib import Path
 from typing import Any
@@ -138,16 +144,12 @@ def train(
     results_dir: Path = Path("results"),
 ) -> Path:
     """Run QLoRA 4-bit SFT with Unsloth and return the saved adapter directory."""
-    import inspect
-
-    # Unsloth must be imported before trl/transformers to apply all kernel patches
+    import torch
+    from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel
     from unsloth.chat_templates import train_on_responses_only
 
     seed = int(config.get("seed", 42))
-
-    import torch
-    from trl import SFTConfig, SFTTrainer
     model_cfg = config["model"]
     lora_cfg = config["lora"]
     train_cfg = config["training"]
@@ -194,49 +196,48 @@ def train(
     val_ds = val_ds.map(_format_to_text, batched=True, remove_columns=val_ds.column_names)
 
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
-    sft_params = inspect.signature(SFTConfig.__init__).parameters
-    sft_kwargs: dict[str, Any] = {
-        "output_dir": train_cfg["output_dir"],
-        "dataset_text_field": "text",
-        "num_train_epochs": float(train_cfg["num_train_epochs"]),
-        "per_device_train_batch_size": int(train_cfg["per_device_train_batch_size"]),
-        "per_device_eval_batch_size": int(train_cfg["per_device_eval_batch_size"]),
-        "gradient_accumulation_steps": int(train_cfg["gradient_accumulation_steps"]),
-        "learning_rate": float(train_cfg["learning_rate"]),
-        "lr_scheduler_type": str(train_cfg["lr_scheduler_type"]),
-        "warmup_ratio": float(train_cfg["warmup_ratio"]),
-        "weight_decay": float(train_cfg["weight_decay"]),
-        "optim": str(train_cfg["optim"]),
-        "logging_steps": int(train_cfg["logging_steps"]),
-        "eval_strategy": str(train_cfg["eval_strategy"]),
-        "eval_steps": int(train_cfg["eval_steps"]),
-        "save_strategy": str(train_cfg["save_strategy"]),
-        "save_steps": int(train_cfg["save_steps"]),
-        "save_total_limit": int(train_cfg["save_total_limit"]),
-        "load_best_model_at_end": bool(train_cfg["load_best_model_at_end"]),
-        "metric_for_best_model": str(train_cfg["metric_for_best_model"]),
-        "greater_is_better": bool(train_cfg["greater_is_better"]),
-        "fp16": not use_bf16,
-        "bf16": use_bf16,
-        "seed": seed,
-        "report_to": "none",
-        "packing": False,
-    }
-    if "max_length" in sft_params:
-        sft_kwargs["max_length"] = int(model_cfg["max_seq_length"])
-    elif "max_seq_length" in sft_params:
-        sft_kwargs["max_seq_length"] = int(model_cfg["max_seq_length"])
+    sft_params = set(inspect.signature(SFTConfig.__init__).parameters)
+    # TRL >= 0.20 renamed `max_seq_length` -> `max_length`
+    seq_len_key = "max_length" if "max_length" in sft_params else "max_seq_length"
+    sft_kwargs: dict[str, Any] = dict(
+        output_dir=train_cfg["output_dir"],
+        dataset_text_field="text",
+        **{seq_len_key: int(model_cfg["max_seq_length"])},
+        num_train_epochs=float(train_cfg["num_train_epochs"]),
+        per_device_train_batch_size=int(train_cfg["per_device_train_batch_size"]),
+        per_device_eval_batch_size=int(train_cfg["per_device_eval_batch_size"]),
+        gradient_accumulation_steps=int(train_cfg["gradient_accumulation_steps"]),
+        learning_rate=float(train_cfg["learning_rate"]),
+        lr_scheduler_type=str(train_cfg["lr_scheduler_type"]),
+        warmup_ratio=float(train_cfg["warmup_ratio"]),
+        weight_decay=float(train_cfg["weight_decay"]),
+        optim=str(train_cfg["optim"]),
+        logging_steps=int(train_cfg["logging_steps"]),
+        eval_strategy=str(train_cfg["eval_strategy"]),
+        eval_steps=int(train_cfg["eval_steps"]),
+        save_strategy=str(train_cfg["save_strategy"]),
+        save_steps=int(train_cfg["save_steps"]),
+        save_total_limit=int(train_cfg["save_total_limit"]),
+        load_best_model_at_end=bool(train_cfg["load_best_model_at_end"]),
+        metric_for_best_model=str(train_cfg["metric_for_best_model"]),
+        greater_is_better=bool(train_cfg["greater_is_better"]),
+        fp16=not use_bf16,
+        bf16=use_bf16,
+        seed=seed,
+        report_to="none",
+        packing=False,
+    )
+    sft_args = SFTConfig(**{k: v for k, v in sft_kwargs.items() if k in sft_params})
 
-    sft_args = SFTConfig(**sft_kwargs)
-
-    trainer_params = inspect.signature(SFTTrainer.__init__).parameters
-    tok_kwarg = "processing_class" if "processing_class" in trainer_params else "tokenizer"
+    # TRL >= 0.12 renamed `tokenizer` -> `processing_class`
+    trainer_params = set(inspect.signature(SFTTrainer.__init__).parameters)
+    tok_key = "processing_class" if "processing_class" in trainer_params else "tokenizer"
     trainer = SFTTrainer(
         model=model,
-        **{tok_kwarg: tokenizer},
         train_dataset=train_ds,
         eval_dataset=val_ds,
         args=sft_args,
+        **{tok_key: tokenizer},
     )
 
     if train_cfg.get("train_on_responses_only", True):
