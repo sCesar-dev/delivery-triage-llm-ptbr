@@ -1,0 +1,119 @@
+{
+  "run_name": "baseline_few_shot",
+  "model_label": "Qwen2.5-3B Base (Few-Shot, 3 ex)",
+  "total_samples": 317,
+  "json_validity_pct": 100.0,
+  "json_validity_with_repair_pct": 100.0,
+  "schema_compliance_pct": 96.53,
+  "schema_compliance_with_repair_pct": 96.53,
+  "macro_f1_categoria": 0.446,
+  "weighted_f1_categoria": 0.7105,
+  "macro_f1_sentimento": 0.568,
+  "accuracy_severidade": 0.7539,
+  "accuracy_acao_sugerida": 0.6562,
+  "accuracy_requer_acao_humana": 0.8864,
+  "latency_mean_ms": 1669.27,
+  "latency_p50_ms": 1657.35,
+  "latency_p95_ms": 1793.74,
+  "num_error_cases": 158,
+  "classification_report_categoria": {
+    "entrega_atrasada": {
+      "precision": 0.8108108108108109,
+      "recall": 0.39473684210526316,
+      "f1-score": 0.5309734513274337,
+      "support": 76.0
+    },
+    "item_errado_ou_faltando": {
+      "precision": 0.29508196721311475,
+      "recall": 0.9473684210526315,
+      "f1-score": 0.45,
+      "support": 19.0
+    },
+    "qualidade_produto": {
+      "precision": 0.30434782608695654,
+      "recall": 0.3181818181818182,
+      "f1-score": 0.3111111111111111,
+      "support": 22.0
+    },
+    "atendimento": {
+      "precision": 0.4,
+      "recall": 0.2857142857142857,
+      "f1-score": 0.3333333333333333,
+      "support": 7.0
+    },
+    "pagamento_cobranca": {
+      "precision": 0.4,
+      "recall": 0.5,
+      "f1-score": 0.4444444444444444,
+      "support": 8.0
+    },
+    "elogio_geral": {
+      "precision": 0.9567901234567902,
+      "recall": 0.8659217877094972,
+      "f1-score": 0.9090909090909091,
+      "support": 179.0
+    },
+    "outro": {
+      "precision": 0.125,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.14285714285714285,
+      "support": 6.0
+    },
+    "micro avg": {
+      "precision": 0.7091503267973857,
+      "recall": 0.6845425867507886,
+      "f1-score": 0.6966292134831461,
+      "support": 317.0
+    },
+    "macro avg": {
+      "precision": 0.4702901039382389,
+      "recall": 0.4969414030614518,
+      "f1-score": 0.4459729131663392,
+      "support": 317.0
+    },
+    "weighted avg": {
+      "precision": 0.794761082874919,
+      "recall": 0.6845425867507886,
+      "f1-score": 0.710478647377394,
+      "support": 317.0
+    }
+  },
+  "classification_report_sentimento": {
+    "positivo": {
+      "precision": 0.9521276595744681,
+      "recall": 0.8994974874371859,
+      "f1-score": 0.9250645994832042,
+      "support": 199.0
+    },
+    "neutro": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 27.0
+    },
+    "negativo": {
+      "precision": 0.6923076923076923,
+      "recall": 0.8901098901098901,
+      "f1-score": 0.7788461538461539,
+      "support": 91.0
+    },
+    "micro avg": {
+      "precision": 0.8496732026143791,
+      "recall": 0.8201892744479495,
+      "f1-score": 0.8346709470304976,
+      "support": 317.0
+    },
+    "macro avg": {
+      "precision": 0.5481451172940535,
+      "recall": 0.596535792515692,
+      "f1-score": 0.567970251109786,
+      "support": 317.0
+    },
+    "weighted avg": {
+      "precision": 0.7964460702060541,
+      "recall": 0.8201892744479495,
+      "f1-score": 0.8042992280667434,
+      "support": 317.0
+    }
+  }
+}

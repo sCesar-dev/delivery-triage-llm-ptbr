@@ -16,3 +16,4 @@ model_gguf/
 *.gguf
 *.safetensors
 .ipynb_checkpoints/
+notebook_results/

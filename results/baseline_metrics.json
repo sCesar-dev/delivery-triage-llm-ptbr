@@ -1,0 +1,21 @@
+{
+  "few_shot": {
+    "run_name": "baseline_few_shot",
+    "model_label": "Qwen2.5-3B Base (Few-Shot, 3 ex)",
+    "total_samples": 317,
+    "json_validity_pct": 100.0,
+    "json_validity_with_repair_pct": 100.0,
+    "schema_compliance_pct": 96.53,
+    "schema_compliance_with_repair_pct": 96.53,
+    "macro_f1_categoria": 0.446,
+    "weighted_f1_categoria": 0.7105,
+    "macro_f1_sentimento": 0.568,
+    "accuracy_severidade": 0.7539,
+    "accuracy_acao_sugerida": 0.6562,
+    "accuracy_requer_acao_humana": 0.8864,
+    "latency_mean_ms": 1669.27,
+    "latency_p50_ms": 1657.35,
+    "latency_p95_ms": 1793.74,
+    "num_error_cases": 158
+  }
+}
